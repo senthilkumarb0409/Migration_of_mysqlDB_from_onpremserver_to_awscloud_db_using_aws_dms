@@ -1,0 +1,92 @@
+Migration of MYSQL DataBase to Cloud AWS using AWS DMS(DATA MIGRATION SERVICE)
+
+Step:1.Setting up Onpremises Server(ubuntu server) where MySQL server will be installed and accessed to create,manipulate etc the databases.
+Step:2.Setting up Cloud Database(AWS RDS) where the migrated database from onprem MySQL will be stored on cloud.
+Step:3.Setting up AWS DMS for the migration process.
+
+Step1:
+  -> Use virtual machines like virtualbox or VMware for running the ubuntu server.
+  ->install the MySQL server on the ubuntu server .
+  ->After installing MySQL ,login as root user and password will be admin by default.
+          ->Login to MySQL as root : mysql -u root -p
+
+  ->Create a new User with remote access and give all the privileges to the user.
+         ->Create a new user: CREATE USER 'username'@'host' IDENTIFIED BY 'password';
+         ->Grant privileges to the user: GRANT ALL PRIVILEGES ON *.* TO 'newuser'@'localhost' WITH GRANT OPTION;
+         ->After granting privileges, it's important to run the FLUSH PRIVILEGES command to ensure                         that:FLUSH PRIVILEGES;
+
+  ->For GUI access of  MySQL DB server use mysqlworkbench :
+  ->import a sample database in the MySQL server so that it can be used for the migration process.
+
+Step 2:
+   ->Creating a AWS RDS DB for storing the migrated DB from the onprem MySQL server.
+       ->login to your aws console and open the rds service.
+       ->Click create database button.
+       ->Choose a database creation method:  Standard create
+       ->Engine options:  MySQL
+       ->Templates:  Free Tier
+       -> Settings: ->DB instance identifier:DB name of ur choice.
+                           ->Credentials Settings:
+                                 ->Master username:admin(ur choice)
+                                 ->Credentials management:self managed
+                                 -> set password
+        ->Connectivity:->public access: yes
+        ->Database authentication:Password authentication
+        ->for all other leave with default values or change according to ur requirements.
+        ->click create database.
+
+Step 3:
+     -> Creating the replication instance,source and target endpoints, migration task using the values from step and step2 for the migrating onprem sql db to aws rds db.
+
+     1->Creating Replication instance:
+         ->Click Create Replication Instance.
+         ->Settings: ->name:ur choice for naming the instance.
+                            ->Description:optional.
+         ->for Instance configuration, Storage,Connectivity and security ,Maintenance use default values or change according to ur requirements.
+        ->click create replication instance.
+     2->Creating Target and Source Endpoints: 
+         ->TARGET END POINT:
+             ->click create endpoint button.
+             ->Endpoint type:->Target endpoint.
+                                         ->check the Select RDS DB instance.
+                                         ->choose the rds db instance u have created in the second step.
+             ->Endpoint configuration:->Endpoint identifier:ur choice.
+                                                       ->Target engine:mysql
+                                                       ->Access to endpoint database:Provide access information manually
+                                                       ->Server name: rds name or endpoint
+                                                       ->port:3306
+                                                      ->username and password: the one u have set while creating rds db.
+               ->Test endpoint connection:run test:successful
+               ->click create end point.
+           
+           ->SOURCE END POINT:
+             ->click create endpoint button.
+             ->Endpoint type:->source endpoint.
+             ->Endpoint configuration:->Endpoint identifier:ur choice.
+                                                       ->Target engine:mysql
+                                                       ->Access to endpoint database:Provide access information manually
+                                                       ->Server name: public ip of vm where ur server resides
+                                                       ->port:3306
+                                                      ->username and password: the one u have set while creating ur user in mysql
+               ->Test endpoint connection:run test:successful
+               ->click create end point.
+
+        3->Creating Database migration Tasks.
+            ->click create task.
+            ->Task configuration:->Task identifier:ur choice
+                                               ->Replication instance:choose the created crct instance.
+                                               -> Source database endpoint:Choose the crct source end point(onprem db) 
+                                               ->Target database endpoint:Choose the crct target end point(cloud rds db) 
+                                               ->Migration type:ur choice
+            ->Task settings:->everything default values or ur choice based on ur requirements.
+                                       ->Maximum LOB size (KB):64kb minimum.
+            ->Premigration assessment :ur wish in my case i turned off
+            ->Migration task startup configuration:Automatically on create
+            -click create task.
+
+after creating it will migrate the slected db or db's from onprem ubuntu server to aws rds if there are no errors while ur setting up the steps.
+
+
+                                               
+
+
