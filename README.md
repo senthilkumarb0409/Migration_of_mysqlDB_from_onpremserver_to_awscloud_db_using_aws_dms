@@ -8,6 +8,8 @@ Step:2.Setting up Cloud Database(AWS RDS) where the migrated database from onpre
 
 Step:3.Setting up AWS DMS for the migration process.
 
+->to watch the video walkthrough :[CLICK HERE!!](https://youtu.be/OXccPmU4c1M)
+
 Step1:
   -> Use virtual machines like virtualbox or VMware for running the ubuntu server.
   
